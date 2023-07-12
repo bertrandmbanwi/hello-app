@@ -63,7 +63,7 @@ jobs:
           [
             {
               "id": "github",
-              "url": "https://maven.pkg.github.com/bertrandmbanwi/hello-app"
+              "url": "https://maven.pkg.github.com/bertrandmbanwi/time-app"
             }
           ]
         servers: >-
