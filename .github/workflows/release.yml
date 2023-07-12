@@ -6,14 +6,15 @@ on:
         - main
   pull_request:
       types:
-       - opened
+        - opened
       branches: 
-       - main
+        - main
       
 
 
 jobs:
   build_publish_and_release:
+
     runs-on: ubuntu-latest
 
     steps:
