@@ -41,8 +41,7 @@ jobs:
     - name: Set new version
       run: |
         version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-        # Remove -SNAPSHOT suffix for releases on main branch
-        newVersion=${version%-SNAPSHOT}
+        newVersion=${version%.*}.$((${version##*.}+1))${{ steps.generate_build_number.outputs.buildNumber }}
         mvn versions:set -DnewVersion=$newVersion
         mvn versions:commit
 
