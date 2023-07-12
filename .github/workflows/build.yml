@@ -1,0 +1,68 @@
+name: Build and Publish Snapshot
+
+# on:
+#   push:
+#     branches: 
+#         - develop
+
+jobs:
+  build_and_publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  
+        ref: ${{ github.head_ref }}
+        token: ${{ secrets.RELEASE_TOKEN }}
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v2
+      with:
+        java-version: 17
+        distribution: 'adopt'
+        server-id: github
+        settings-path: ${{ github.workspace }}
+
+    - name: Generate Build Number
+      id: generate_build_number
+      run: |
+        buildNumber=$(mvn buildnumber:create | grep "BuildNumber" | cut -d' ' -f2)
+        echo "::set-output name=buildNumber::$buildNumber"
+
+    - name: Set new version
+      run: |
+        version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        newVersion=${version%.*}.$((${version##*.}+1))${{ steps.generate_build_number.outputs.buildNumber }}-SNAPSHOT
+        mvn versions:set -DnewVersion=$newVersion
+        mvn versions:commit
+      
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Publish to GitHub Packages Apache Maven
+      uses: whelk-io/maven-settings-xml-action@v21
+      with:
+        repositories: >-
+          [
+            {
+              "id": "github",
+              "url": "https://maven.pkg.github.com/bertrandmbanwi/hello-app"
+            }
+          ]
+        servers: >-
+          [
+            {
+              "id": "github",
+              "username": "${{ github.actor }}",
+              "password": "${{ secrets.RELEASE_TOKEN }}"
+            }
+          ]
+
+    - name: Commit and Push Changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git remote set-url origin https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }}
+        git commit -m "Prepare for next development iteration [ci skip] " -a
+        git push
