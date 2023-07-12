@@ -1,21 +1,14 @@
-name: Publish and Release on Main Branch
+name: Build, Publish and Release
 
 on:
-
-
-  # pull_request:
-  #   types: 
-  #       - opened
-  #   branches: 
-  #       - main
-  
   push:
     branches: 
         - main
+
+
 jobs:
-  publish_and_release:
+  build_publish_and_release:
     runs-on: ubuntu-latest
-   
 
     steps:
     - uses: actions/checkout@v2
@@ -41,12 +34,16 @@ jobs:
     - name: Set new version
       run: |
         version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-        newVersion=${version%.*}.$((${version##*.}+1))${{ steps.generate_build_number.outputs.buildNumber }}
+        if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            # Remove -SNAPSHOT suffix for releases on main branch
+            newVersion=${version%-SNAPSHOT}
+        else
+            # Increment version and append -SNAPSHOT suffix for development
+            newVersion=${version%.*}.$((${version##*.}+1))${{ steps.generate_build_number.outputs.buildNumber }}-SNAPSHOT
+        fi
         mvn versions:set -DnewVersion=$newVersion
         mvn versions:commit
       
-      
-
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
@@ -57,7 +54,7 @@ jobs:
           [
             {
               "id": "github",
-              "url": "https://maven.pkg.github.com/bertrandmbanwi/time-app"
+              "url": "https://maven.pkg.github.com/bertrandmbanwi/hello-app"
             }
           ]
         servers: >-
@@ -69,12 +66,6 @@ jobs:
             }
           ]
 
-    - name: Deploy to GitHub Pages
-      run: mvn deploy -s ${{ github.workspace }}/settings.xml
-      env:
-              GITHUB_USERNAME: ${{ github.actor }}
-              GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-
     - name: Commit and Push Changes
       run: |
         git config --local user.email "action@github.com"
@@ -83,9 +74,8 @@ jobs:
         git commit -m "Prepare for release [ci skip] " -a
         git push
 
-
     - name: Create Release Tag
-      id: create_tag
+      if: github.ref == 'refs/heads/main'
       run: |
         version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
         git tag $version
