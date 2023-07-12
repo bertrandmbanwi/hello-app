@@ -3,7 +3,7 @@
   <groupId>com.pluribus.app</groupId>
   <artifactId>time-app</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.3-SNAPSHOT</version>
   <name>time-app</name>
   <url>http://maven.apache.org</url>
 
