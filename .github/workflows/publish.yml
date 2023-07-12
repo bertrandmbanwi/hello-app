@@ -24,13 +24,34 @@ jobs:
         server-id: github
         settings-path: ${{ github.workspace }}
 
+    - name: Get short SHA
+      id: getsha
+      run: |
+        echo "sha7=$(echo ${GITHUB_SHA} | cut -c1-7)" >> "$GITHUB_ENV"
+        echo "git_hash=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
+        echo "sha=$(echo ${GITHUB_SHA})" >> "$GITHUB_ENV"
+        
     - name: Set new version
       run: |
         version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
         newVersion=${version%-SNAPSHOT}
-        mvn versions:set -DnewVersion=$newVersion
+        mvn versions:set -DnewVersion=$newVersion-$sha7
         mvn versions:commit
-      
+
+    - name: Commit and Push Changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git remote set-url origin https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }}
+        git commit -m "Prepare for release [ci skip] " -a
+        git push
+
+    - name: Create Release Tag
+      run: |
+        version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        git tag $version
+        git push origin $version
+
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
@@ -58,17 +79,3 @@ jobs:
       env:
           GITHUB_USERNAME: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-
-    - name: Commit and Push Changes
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git remote set-url origin https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }}
-        git commit -m "Prepare for release [ci skip] " -a
-        git push
-
-    - name: Create Release Tag
-      run: |
-        version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-        git tag $version
-        git push origin $version
