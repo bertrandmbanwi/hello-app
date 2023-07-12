@@ -67,6 +67,12 @@ jobs:
             }
           ]
 
+    - name: Deploy to GitHub Pages
+      run: mvn deploy -s ${{ github.workspace }}/settings.xml
+      env:
+          GITHUB_USERNAME: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+
     - name: Commit and Push Changes
       run: |
         git config --local user.email "action@github.com"
