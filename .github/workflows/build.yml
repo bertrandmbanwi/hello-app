@@ -1,9 +1,9 @@
 name: Build, Publish and Release
 
-# on:
-#   push:
-#     branches: 
-#         - main
+on:
+  push:
+    branches: 
+        - main
 
 jobs:
   build_publish_and_release:
