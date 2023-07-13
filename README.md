@@ -4,6 +4,4 @@
 # This is a test comment
 # Pluribus Digital
 I have added this text. so that i can test version update correctly...
-let hello-world = "Hellojghgjhj
-gfhhjkkll
- hello-world
+let hello-world = "Hellojghgjhj-test
