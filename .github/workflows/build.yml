@@ -1,4 +1,4 @@
-name: Build, Publish and Release
+name: Build and Publish Snapshot
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
         - develop
 
 jobs:
-  build_publish_and_release:
+  build_and_publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,28 +23,27 @@ jobs:
         distribution: 'adopt'
         server-id: github
         settings-path: ${{ github.workspace }}
-        
+
+    - name: Generate Build Number
+      id: generate_build_number
+      run: |
+        buildNumber=$(mvn buildnumber:create | grep "BuildNumber" | cut -d' ' -f2)
+        echo "::set-output name=buildNumber::$buildNumber"
+
     - name: Set new version
       run: |
         version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-        newVersion=${version%-SNAPSHOT}
+        newVersion=${version%.*}.$((${version##*.}+1))${{ steps.generate_build_number.outputs.buildNumber }}-SNAPSHOT
         mvn versions:set -DnewVersion=$newVersion
         mvn versions:commit
-
     - name: Commit and Push Changes
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git remote set-url origin https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }}
-        git commit -m "Prepare for release [ci skip] " -a
+        git commit -m "Prepare for next development iteration [ci skip] " -a
         git push
-
-    - name: Create Release Tag
-      run: |
-        version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-        git tag $version
-        git push origin $version
-
+        
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
@@ -66,9 +65,9 @@ jobs:
               "password": "${{ secrets.RELEASE_TOKEN }}"
             }
           ]
-
     - name: Deploy to GitHub Pages
       run: mvn deploy -s ${{ github.workspace }}/settings.xml
       env:
           GITHUB_USERNAME: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+    
