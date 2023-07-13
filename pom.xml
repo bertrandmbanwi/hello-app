@@ -4,7 +4,7 @@
   <artifactId>time-app</artifactId>
   <packaging>jar</packaging>
 
-  <version>1.0.14-SNAPSHOT</version>
+  <version>1.0.14-b9aefaa</version>
 
   <name>time-app</name>
   <url>http://maven.apache.org</url>
