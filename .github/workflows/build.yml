@@ -1,16 +1,13 @@
-name: Build and Publish Snapshot
-
+name: Build, Publish and Release
 
 on:
   push:
     branches: 
-        - develop
-# This workflow will be triggered when you push to the 'develop' branch
+        - main
 
 jobs:
-  build_and_publish:
+  build_publish_and_release:
     runs-on: ubuntu-latest
- 
 
     steps:
     - uses: actions/checkout@v2
@@ -18,8 +15,7 @@ jobs:
         fetch-depth: 0  
         ref: ${{ github.head_ref }}
         token: ${{ secrets.RELEASE_TOKEN }}
-    # This step checks out your repository so the workflow can access it
-
+    
     - name: Set up JDK 17
       uses: actions/setup-java@v2
       with:
@@ -27,43 +23,37 @@ jobs:
         distribution: 'adopt'
         server-id: github
         settings-path: ${{ github.workspace }}
-    # This step sets up Java Development Kit (JDK) 17 for the workflow
 
     - name: Get short SHA
       id: getsha
       run: |
-          echo "sha7=$(echo ${GITHUB_SHA} | cut -c1-7)" >> "$GITHUB_ENV"
-          echo "git_hash=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
-          echo "sha=$(echo ${GITHUB_SHA})" >> "$GITHUB_ENV"
-    # This step gets the short SHA of the commit that triggered the workflow
-
+        echo "sha7=$(echo ${GITHUB_SHA} | cut -c1-7)" >> "$GITHUB_ENV"
+        echo "git_hash=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
+        echo "sha=$(echo ${GITHUB_SHA})" >> "$GITHUB_ENV"
+        
     - name: Set new version
       run: |
-          version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          newVersion=${version%-SNAPSHOT}
-          mvn versions:set -DnewVersion=$newVersion-$sha7
-          mvn versions:commit
-    # This step sets a new version for your Maven project
+        version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        newVersion=${version%-SNAPSHOT}
+        mvn versions:set -DnewVersion=$newVersion-$sha7
+        mvn versions:commit
 
     - name: Commit and Push Changes
       run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git remote set-url origin https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }}
-          git commit -m "Prepare for release [ci skip] " -a
-          git push
-    # This step commits and pushes the changes made by the workflow
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git remote set-url origin https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }}
+        git commit -m "Prepare for release [ci skip] " -a
+        git push
 
     - name: Create Release Tag
       run: |
-          version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          git tag $version
-          git push origin $version
-    # This step creates a new release tag
+        version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        git tag $version
+        git push origin $version
 
     - name: Build with Maven
       run: mvn -B package --file pom.xml
-    # This step builds your Maven project
 
     - name: Publish to GitHub Packages Apache Maven
       uses: whelk-io/maven-settings-xml-action@v21
@@ -83,11 +73,9 @@ jobs:
               "password": "${{ secrets.RELEASE_TOKEN }}"
             }
           ]
-    # This step publishes your Maven project to GitHub Packages
 
-    - name: Deploy to GitHub Packages
+    - name: Deploy to GitHub Pages
       run: mvn deploy -s ${{ github.workspace }}/settings.xml
       env:
-         GITHUB_USERNAME: ${{ github.actor }}
-         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-    # This step deploys your Maven project to GitHub Packages
+          GITHUB_USERNAME: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
