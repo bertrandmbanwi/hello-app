@@ -27,14 +27,16 @@ jobs:
     - name: Generate Build Number
       id: generate_build_number
       run: |
-        buildNumber=$(mvn buildnumber:create | grep "BuildNumber" | cut -d' ' -f2)
-        echo "::set-output name=buildNumber::$buildNumber"
+        buildNumber="$(mvn buildnumber:create 2>&1 | grep buildNumber | cut -d' ' -f4)"
+        echo "buildNumber=$buildNumber" >> $GITHUB_OUTPUT
+        env
     - name: Set new version
       run: |
-        version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-        newVersion=${version%.*}.$((${version##*.}+1))${{ steps.generate_build_number.outputs.buildNumber }}-SNAPSHOT
+        version="$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+        newVersion="${version%.*}.$((${version##*.}+1)).${{ steps.generate_build_number.outputs.buildNumber }}-SNAPSHOT"
         mvn versions:set -DnewVersion=$newVersion
         mvn versions:commit
+
     - name: Commit and Push Changes
       run: |
            git config --local user.email "action@github.com"
@@ -42,7 +44,7 @@ jobs:
            git remote set-url origin https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }}
            git add buildNumber.properties settings.xml
            git diff-index --quiet HEAD || git commit -m "Prepare for next development iteration [ci skip]"
-           git push origin develop
+           git push
 
         
     - name: Build with Maven

@@ -4,7 +4,7 @@
   <artifactId>time-app</artifactId>
   <packaging>jar</packaging>
   
-  <version>1.0.30-93057b8</version>
+  <version>1.0.34.13-SNAPSHOT</version>
 
 
   <name>time-app</name>
