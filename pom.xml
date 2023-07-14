@@ -1,27 +1,27 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.pluribus.app</groupId>
-  <artifactId>time-app</artifactId>
+  <artifactId>test-app</artifactId>
   <packaging>jar</packaging>
   
   <version>1.0.23-5844cfb</version>
 
   
-  <name>time-app</name>
+  <name>test-app</name>
   <url>http://maven.apache.org</url>
 
   <scm>
-    <connection>scm:git:git@github.com:bertrandmbanwi/time-app.git</connection>
-    <developerConnection>scm:git:git@github.com:bertrandmbanwi/time-app.git</developerConnection>
-    <url>https://github.com/bertrandmbanwi/time-app</url>
+    <connection>scm:git:git@github.com:temidevops1/test-app.git</connection>
+    <developerConnection>scm:git:git@github.com:temidevops1/test-app.git</developerConnection>
+    <url>https://github.com/temidevops1/test-app</url>
     <tag>HEAD</tag>
   </scm>
 
   <distributionManagement> 
     <repository>
       <id>github</id>
-      <name>GitHub bertrandmbanwi Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/bertrandmbanwi/time-app</url> 
+      <name>GitHub temidevops1 Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/temidevops1/test-app</url> 
     </repository>
   </distributionManagement>
 
