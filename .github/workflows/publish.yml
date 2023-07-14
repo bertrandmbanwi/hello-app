@@ -43,7 +43,7 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git remote set-url origin https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }}
-        git commit -m "Prepare for release" -a
+        git commit -m "Prepare for release [ci skip]" -a
         git push origin develop
 
     - name: Create Release Tag
