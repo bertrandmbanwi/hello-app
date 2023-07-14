@@ -42,7 +42,7 @@ jobs:
            git config --local user.email "action@github.com"
            git config --local user.name "GitHub Action"
            git remote set-url origin https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }}
-           git add buildNumber.properties settings.xml
+           git add buildNumber.properties pom.xml
            git diff-index --quiet HEAD || git commit -m "Prepare for next development iteration [ci skip]"
            git push
 
