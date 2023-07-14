@@ -33,7 +33,7 @@ jobs:
     - name: Set new version
       run: |
         version="$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
-        newVersion="${version%.*}.$((${version##*.}+1)).${{ steps.generate_build_number.outputs.buildNumber }}-SNAPSHOT"
+        newVersion="${version%.*}.${{ steps.generate_build_number.outputs.buildNumber }}-SNAPSHOT"
         mvn versions:set -DnewVersion=$newVersion
         mvn versions:commit
 
