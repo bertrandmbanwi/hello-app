@@ -29,7 +29,6 @@ jobs:
       run: |
         buildNumber=$(mvn buildnumber:create | grep "BuildNumber" | cut -d' ' -f2)
         echo "::set-output name=buildNumber::$buildNumber"
-
     - name: Set new version
       run: |
         version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
@@ -70,4 +69,3 @@ jobs:
       env:
           GITHUB_USERNAME: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-    
