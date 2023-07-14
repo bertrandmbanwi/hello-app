@@ -4,7 +4,8 @@
   <artifactId>time-app</artifactId>
   <packaging>jar</packaging>
   
-  <version>1.0.22-745bb91</version>
+  <version>1.0.23-SNAPSHOT</version>
+
   
   <name>time-app</name>
   <url>http://maven.apache.org</url>
@@ -45,14 +46,6 @@
         </configuration>
       </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>3.0.1</version>
-        <configuration>
-          <tagNameFormat>v@{project.version}-RELEASE</tagNameFormat>
-        </configuration>
-      </plugin>
 
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
