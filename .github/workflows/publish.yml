@@ -49,6 +49,7 @@ jobs:
     - name: Create Release Tag
       run: |
         version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        echo "version to be tagged: $version"
         git tag $version
         git push origin $version
 
