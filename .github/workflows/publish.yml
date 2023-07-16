@@ -33,6 +33,7 @@ jobs:
         
     - name: Set new version
       run: |
+        export TZ=America/New_York
         version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
         timestamp=$(date +"%Y-%m-%d-%H:%M:%S")
         newVersion=${version%-SNAPSHOT}
