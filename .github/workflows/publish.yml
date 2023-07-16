@@ -34,8 +34,9 @@ jobs:
     - name: Set new version
       run: |
         version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        timestamp=$(date +"%Y-%m-%d-%H:%M:%S")
         newVersion=${version%-SNAPSHOT}
-        mvn versions:set -DnewVersion=$newVersion-$sha7
+        mvn versions:set -DnewVersion=$newVersion-$sha7-$timestamp
         mvn versions:commit
 
     - name: Commit and Push Changes
@@ -49,9 +50,10 @@ jobs:
     - name: Create Release Tag
       run: |
         version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-        echo "version to be tagged: $version"
-        git tag $version
-        git push origin $version
+        tagVersion=${version%-*-*}
+        echo "version to be tagged: $tagVersion"
+        git tag $tagVersion
+        git push origin $tagVersion
 
     - name: Build with Maven
       run: mvn -B package --file pom.xml
