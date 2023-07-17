@@ -24,16 +24,17 @@ jobs:
         server-id: github
         settings-path: ${{ github.workspace }}
 
-    - name: Generate Build Number
-      id: generate_build_number
+    - name: Get short SHA
+      id: getsha
       run: |
-        buildNumber="$(mvn buildnumber:create 2>&1 | grep buildNumber | cut -d' ' -f4)"
-        echo "buildNumber=$buildNumber" >> $GITHUB_OUTPUT
-        env
+        echo "sha7=$(echo ${GITHUB_SHA} | cut -c1-7)" >> "$GITHUB_ENV"
+        echo "git_hash=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
+
     - name: Set new version
       run: |
-        version="$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
-        newVersion="${version%.*}.${{ steps.generate_build_number.outputs.buildNumber }}-SNAPSHOT"
+        version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        export TIMESTAMP=$(mvn help:evaluate -Dexpression=maven.build.timestamp -q -DforceStdout)
+        newVersion=${version%-SNAPSHOT}-$sha7-$TIMESTAMP-SNAPSHOT
         mvn versions:set -DnewVersion=$newVersion
         mvn versions:commit
 
@@ -42,14 +43,12 @@ jobs:
            git config --local user.email "action@github.com"
            git config --local user.name "GitHub Action"
            git remote set-url origin https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }}
-           git add buildNumber.properties pom.xml
+           git add pom.xml
            git diff-index --quiet HEAD || git commit -m "Prepare for next development iteration [ci skip]"
            git push
 
-        
     - name: Build with Maven
       run: mvn -B package --file pom.xml
-
 
     - name: Publish to GitHub Packages Apache Maven
       run: mvn deploy -s ${{ github.workspace }}/settings.xml
