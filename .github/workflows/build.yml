@@ -33,10 +33,12 @@ jobs:
     - name: Set new version
       run: |
         version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-        export TIMESTAMP=$(mvn help:evaluate -Dexpression=maven.build.timestamp -q -DforceStdout)
-        newVersion=${version%-SNAPSHOT}-$sha7-$TIMESTAMP-SNAPSHOT
+        baseVersion=${version%-*-*-*-*} 
+        timestamp=$(mvn help:evaluate -Dexpression=maven.build.timestamp -q -DforceStdout)
+        newVersion=$baseVersion-$sha7-$timestamp-SNAPSHOT
         mvn versions:set -DnewVersion=$newVersion
         mvn versions:commit
+      
 
     - name: Commit and Push Changes
       run: |
