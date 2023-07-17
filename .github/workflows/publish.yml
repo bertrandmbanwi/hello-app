@@ -33,10 +33,11 @@ jobs:
         
     - name: Set new version
       run: |
+        export TZ=America/New_York
         version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-        timestamp=$(mvn help:evaluate -Dexpression=maven.build.timestamp -q -DforceStdout)
+        timestamp=$(date +"%Y-%m-%d-%H:%M:%S")
         newVersion=${version%-SNAPSHOT}
-        mvn versions:set -DnewVersion=$newVersion-$timestamp-$sha7
+        mvn versions:set -DnewVersion=$newVersion-$sha7-$timestamp
         mvn versions:commit
 
     - name: Commit and Push Changes
@@ -45,7 +46,7 @@ jobs:
         git config --local user.name "GitHub Action"
         git remote set-url origin https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }}
         git commit -m "Prepare for release [ci skip]" -a
-        git push origin main
+        git push
 
     - name: Create Release Tag
       run: |
