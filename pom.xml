@@ -9,9 +9,11 @@
   <name>time-app</name>
   <url>http://maven.apache.org</url>
 
-  <properties>
+<properties>
     <maven.build.timestamp.format>yyyy-MM-dd'T'HH.mm.ss</maven.build.timestamp.format>
-  </properties>
+    <maven.build.timestamp>${maven.build.timestamp}</maven.build.timestamp>
+</properties>
+
 
   <scm>
     <connection>scm:git:git@github.com:bertrandmbanwi/time-app.git</connection>
