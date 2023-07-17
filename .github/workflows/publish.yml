@@ -29,15 +29,17 @@ jobs:
       run: |
         echo "sha7=$(echo ${GITHUB_SHA} | cut -c1-7)" >> "$GITHUB_ENV"
         echo "git_hash=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
-      
+
+    - name: Get timestamp
+      run: |
+        timestamp=$(mvn help:evaluate -Dexpression=maven.build.timestamp -q -DforceStdout)
+        echo "timestamp=$timestamp" >> "$GITHUB_ENV"
         
     - name: Set new version
       run: |
-        export TZ=America/New_York
         version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-        timestamp=$(date +"%Y-%m-%d-%H:%M:%S")
         newVersion=${version%-SNAPSHOT}
-        mvn versions:set -DnewVersion=$newVersion-$sha7-$timestamp
+        mvn versions:set -DnewVersion=$newVersion-$sha7-${{ env.timestamp }}
         mvn versions:commit
 
     - name: Commit and Push Changes
