@@ -28,12 +28,13 @@ jobs:
       id: generate_build_number
       run: |
         buildNumber="$(mvn buildnumber:create 2>&1 | grep buildNumber | cut -d' ' -f4)"
-        echo "buildNumber=$buildNumber" >> $GITHUB_OUTPUT
-        env
+        echo "buildNumber=$buildNumber" >> $GITHUB_ENV
+
     - name: Set new version
       run: |
         version="$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
-        newVersion="${version%.*}.${{ steps.generate_build_number.outputs.buildNumber }}-SNAPSHOT"
+        timestamp=$(mvn help:evaluate -Dexpression=maven.build.timestamp -q -DforceStdout)
+        newVersion="${version%.*}.${{ env.buildNumber }}-$timestamp-SNAPSHOT"
         mvn versions:set -DnewVersion=$newVersion
         mvn versions:commit
 
@@ -46,10 +47,8 @@ jobs:
            git diff-index --quiet HEAD || git commit -m "Prepare for next development iteration [ci skip]"
            git push
 
-        
     - name: Build with Maven
       run: mvn -B package --file pom.xml
-
 
     - name: Publish to GitHub Packages Apache Maven
       run: mvn deploy -s ${{ github.workspace }}/settings.xml
